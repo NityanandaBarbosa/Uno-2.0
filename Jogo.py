@@ -1,4 +1,6 @@
 import random
+import os
+from time import sleep
 
 class Jogador:
     
@@ -31,9 +33,12 @@ class Jogo:
         self.nJogadores = nJogadores
         self.inicioFila = None
         self.fimFila = None
+        self.auxJogador = None
+        self.fimJogo = False
+        self.round = 0
     
     def stackGen(self):
-        arquivo = open('cartas.txt','r')
+        arquivo = open('/home/nityananda/Transferências/EstudoPython/Uno/cartas.txt','r')
         for i in arquivo:
             i = i.split(',')
             for j in i:
@@ -44,14 +49,29 @@ class Jogo:
         arquivo.close()
     
     def deckGen(self):
-        auxJogador = self.inicioFila
+        aux = self.inicioFila
         for i in range(self.nJogadores):
             for j in range(7):
                 x = random.choice(self.stack)
-                auxJogador.deck.append(x)
+                aux.deck.append(x)
                 self.stack.remove(x)
-                auxJogador = auxJogador.getProxJogador()
-        self.imprimirFilaJogadores()
+                aux = aux.getProxJogador()
+        #self.imprimirFilaJogadores()
+    
+    def deckPrint(self):
+        count1 = 0
+        count2 = len(self.auxJogador.deck)*3
+        for i in self.auxJogador.deck:
+            for j in i:
+                count1 += 1
+        count1 += count2
+        print("-"*count1)
+        saida =''
+        for i in self.auxJogador.deck:
+            saida += "|" + str(i) + " "
+        saida += "|"
+        print(saida)
+        print("-"*count1)
 
     def filaJogadores(self, numPlayers):
         for i in range(numPlayers):
@@ -87,11 +107,36 @@ class Jogo:
         #    saida2 += str(noAux2.getNome()) + " / "
         #    noAux2 = noAux2.getAnteriorJogador()
 
+    def checkEndGame(self):
+        noAux = self.inicioFila
+        for i in range(self.nJogadores):
+            if(len(noAux.deck) == 0):
+                print("O "+ str(noAux.nome) + "e o ganhador !!")
+                self.fimJogo = True
+                return True
+            else:
+                noAux = noAux.getProxJogador()
+        return False
+    
+    def discarte(self):
+        sleep(1); os.system('clear')
+        print("Vez do jogador : " + str(self.auxJogador.nome))
+        self.deckPrint()
+        if(self.round == 0):
+            pass
+        else:
+            pass
+    def rodadas(self):
+        self.auxJogador = self.inicioFila
+        if(Jogo.checkEndGame(self) == False):
+            self.discarte()
+
 
     def partida(self):
         self.filaJogadores(self.nJogadores)
         self.stackGen()
         self.deckGen()
+        self.rodadas()
 
 
 njogadores = int(input("Quantos jogadores irao jogar ?\nObs: Min: 2 jogadores.\nMax: 10 jogadores.\n"))

@@ -36,6 +36,8 @@ class Jogo:
         self.auxJogador = None
         self.fimJogo = False
         self.round = 0
+        self.sentidoReverso = False
+        self.ultimoDiscarte = [] 
     
     def stackGen(self):
         arquivo = open('/home/nityananda/Transferências/EstudoPython/Uno/cartas.txt','r')
@@ -60,15 +62,15 @@ class Jogo:
     
     def deckPrint(self):
         count1 = 0
-        count2 = len(self.auxJogador.deck)*3
+        count2 = (len(self.auxJogador.deck )-1)*3
         for i in self.auxJogador.deck:
             for j in i:
                 count1 += 1
-        count1 += count2
+        count1 += count2 + 4
         print("-"*count1)
         saida =''
         for i in self.auxJogador.deck:
-            saida += "|" + str(i) + " "
+            saida += "| " + str(i) + " "
         saida += "|"
         print(saida)
         print("-"*count1)
@@ -119,13 +121,29 @@ class Jogo:
         return False
     
     def discarte(self):
-        sleep(1); os.system('clear')
+        sleep(1); os.system('clear'); escolha = 99; confirme = False
         print("Vez do jogador : " + str(self.auxJogador.nome))
         self.deckPrint()
         if(self.round == 0):
-            pass
+            print('Pode jogar qualquer carta.\nObs:Cartas de efeito não funcionaram.')
+            while(escolha > len(self.auxJogador.deck)):
+                escolha = int(input("Escolha a carta a ser jogada"))
+            escolha = self.auxJogador.deck[escolha - 1]
+            self.ultimoDiscarte = escolha.split(' ')
+            self.auxJogador.deck.remove(escolha)
+            print(self.auxJogador.deck, self.ultimoDiscarte)
+
         else:
+           while(escolha > len(self.auxJogador.deck) and confirme == True):
+                escolha = int(input("Escolha a carta a ser jogada")) 
+                escolhaCheck = self.auxJogador.deck[escolha - 1]
+                self.discarteCheck(escolhaCheck,confirme)
+        self.round += 1   
+
+    def dicarteCheck(self, escolhaCheck, confirme):
+        if():
             pass
+
     def rodadas(self):
         self.auxJogador = self.inicioFila
         if(Jogo.checkEndGame(self) == False):

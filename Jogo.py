@@ -120,6 +120,25 @@ class Jogo:
                 noAux = noAux.getProxJogador()
         return False
     
+    def pegarCarta(self):
+        novaCarta = ''
+        if(len(self.stack) != 0):
+            novaCarta = random.choice(self.stack)
+            self.stack.remove(novaCarta)
+        else:
+            novaCarta = random.choice(self.discardStack)
+            self.discardStack.remove(novaCarta)
+        self.auxJogador.deck.append(novaCarta)
+
+    
+    def discarteCheck(self, escolhaCheck, confirme):
+        if(escolhaCheck == 0):
+            self.pegarCarta()
+            confirme = True
+        else:
+            pass
+        return confirme
+    
     def discarte(self):
         sleep(1); os.system('clear'); escolha = 99; confirme = False
         print("Vez do jogador : " + str(self.auxJogador.nome))
@@ -132,23 +151,26 @@ class Jogo:
             self.ultimoDiscarte = escolha.split(' ')
             self.auxJogador.deck.remove(escolha)
             print(self.auxJogador.deck, self.ultimoDiscarte)
-
         else:
-           while(escolha > len(self.auxJogador.deck) and confirme == True):
+           while(escolha > len(self.auxJogador.deck) and confirme == False):
                 escolha = int(input("Escolha a carta a ser jogada")) 
                 escolhaCheck = self.auxJogador.deck[escolha - 1]
-                self.discarteCheck(escolhaCheck,confirme)
-        self.round += 1   
-
-    def dicarteCheck(self, escolhaCheck, confirme):
-        if():
-            pass
+                confirme = self.discarteCheck(escolha,confirme)
+                print(self.auxJogador.deck, self.ultimoDiscarte)
+                sleep(5)
+        self.round += 1 
+        self.proxJogar() 
 
     def rodadas(self):
         self.auxJogador = self.inicioFila
-        if(Jogo.checkEndGame(self) == False):
+        while(Jogo.checkEndGame(self) == False):
             self.discarte()
-
+    
+    def proxJogar(self):
+        if(self.sentidoReverso == True):
+            self.auxJogador = self.auxJogador.getAnteriorJogador()
+        else:
+            self.auxJogador = self.auxJogador.getProxJogador()
 
     def partida(self):
         self.filaJogadores(self.nJogadores)

@@ -38,6 +38,8 @@ class Jogo:
         self.round = 0
         self.pegarCard = 0
         self.sentidoReverso = False
+        self.acumuloCartas = 0
+        self.enqMais = False
         self.ultimoDiscarte = [] 
     
     def stackGen(self):
@@ -61,16 +63,16 @@ class Jogo:
                 aux = aux.getProxJogador()
         #self.imprimirFilaJogadores()
     
-    def deckPrint(self):
+    def deckPrint(self, thing):
         count1 = 0
         count2 = (len(self.auxJogador.deck )-1)*3
-        for i in self.auxJogador.deck:
+        for i in thing:
             for j in i:
                 count1 += 1
         count1 += count2 + 4
         print("-"*count1)
         saida =''
-        for i in self.auxJogador.deck:
+        for i in thing:
             saida += "| " + str(i) + " "
         saida += "|"
         print(saida)
@@ -137,41 +139,72 @@ class Jogo:
             self.sentidoReverso = True
         else:
             if(escolhaCheck[1] == 'cancela'):
-                self.auxJogador = self.auxJogador.proxJogador()
+                self.proxJogar()
     
     def maisCarta(self, escolhaCheck):
-        pass
+        if(self.enqMais == False):
+            if(escolhaCheck[1] in ['+2','+4']):
+                self.enqMais = True
+                self.acumuloCartas += int(escolhaCheck[1])
+        else:
+            print("Acumulado de cartas está no total de : " + str(self.acumuloCartas))
+            if(escolhaCheck[1] in ['+2','+4']):
+                self.acumuloCartas += int(escolhaCheck[1])
+            else:
+                print("Voce receberá : " + str(self.acumuloCartas))
+                if(len(self.stack) != 0):
+                    for i in range(self.acumuloCartas):
+                        novaCarta = random.choice(self.stack)
+                        self.auxJogador.deck.append(novaCarta)
+                        self.stack.remove(novaCarta)
+                else:
+                   for i in range(self.acumuloCartas):
+                        novaCarta = random.choice(self.discardStack)
+                        self.auxJogador.deck.append(novaCarta)
+                        self.discardStack.remove(novaCarta) 
+                self.enqMais = False; self.acumuloCartas = 0
+
 
     def discarteCheck(self, escolha,escolhaCheck,confirm):
         if(escolha == 0):
             self.pegarCarta()
             print("Foi pego uma carta, caso não seja possivel discarte aperte 0 novamente")
-            self.deckPrint()
+            self.deckPrint(self.auxJogador.deck)
             if(self.pegarCard == 2):
                 confirm = True
         else:
             if(escolhaCheck[0] == self.ultimoDiscarte[0]):
                 self.reversoEblockCheck(escolhaCheck)
+                self.maisCarta(escolhaCheck)
                 confirm = True
             elif(escolhaCheck[1] == self.ultimoDiscarte[1]):
                 if(escolhaCheck[0] != self.ultimoDiscarte[1]):
                     print("Cor foi mudada para : " + str(escolhaCheck[0]))
+                self.maisCarta(escolhaCheck)
                 confirm = True
             else:
-                if(escolhaCheck[0] == 'coringa' and escolhaCheck[1] == '+2' or '+4'):
-                    pass
-                else:
-                    pass
-
-        return confirm
+                if(escolhaCheck[0] == 'coringa'):
+                    cores = ['vermelho','azul','verde','amarelo']; cor = 0
+                    self.deckPrint(cores)
+                    while(cor > 4 or cor < 1):
+                        cor = int(input("Escolha a cor :"))
+                    print("Cor foi mudada para : " + str(cores[cor-1]))
+                    escolhaCheck[0] = cores[cor-1]
+                    confirm = True
+                elif(escolhaCheck[1] in ['+2','+4']):
+                    self.maisCarta(escolhaCheck)
+                    confirm = True
+        return confirm,escolhaCheck
     
     def discarte(self):
-        sleep(1); os.system('clear'); escolha = 99; confirme = False;
+        sleep(1); 
+        #os.system('clear'); 
+        escolha = 99; confirme = False;
         print("Vez do jogador : " + str(self.auxJogador.nome)+ "\nCarta passada : "+ str(self.ultimoDiscarte))
-        self.deckPrint()
+        self.deckPrint(self.auxJogador.deck)
         if(self.round == 0):
             print('Pode jogar qualquer carta.\nObs:Cartas de efeito não funcionaram.')
-            while(escolha > len(self.auxJogador.deck)):
+            while(escolha >= len(self.auxJogador.deck)):
                 escolha = int(input("Escolha a carta a ser jogada"))
             escolha = self.auxJogador.deck[escolha - 1]
             self.ultimoDiscarte = escolha.split(' ')
@@ -184,7 +217,7 @@ class Jogo:
                 if(escolha < len(self.auxJogador.deck) and escolha >= 0):
                     escolhaCheck = self.auxJogador.deck[escolha - 1].split(' ')
                     print(escolhaCheck)
-                    confirme = self.discarteCheck(escolha,escolhaCheck,confirme)
+                    confirme,escolhaCheck = self.discarteCheck(escolha,escolhaCheck,confirme)
                     if(confirme == True):
                         if(self.pegarCard == 2):
                             print("Passa jogada !!")

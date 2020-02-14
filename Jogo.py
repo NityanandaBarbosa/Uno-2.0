@@ -36,6 +36,7 @@ class Jogo:
         self.auxJogador = None
         self.fimJogo = False
         self.round = 0
+        self.pegarCard = 0
         self.sentidoReverso = False
         self.ultimoDiscarte = [] 
     
@@ -129,6 +130,7 @@ class Jogo:
             novaCarta = random.choice(self.discardStack)
             self.discardStack.remove(novaCarta)
         self.auxJogador.deck.append(novaCarta)
+        self.pegarCard += 1
 
     def reversoEblockCheck(self,escolhaCheck):
         if(escolhaCheck[1] == 'reverso'):
@@ -143,7 +145,10 @@ class Jogo:
     def discarteCheck(self, escolha,escolhaCheck,confirm):
         if(escolha == 0):
             self.pegarCarta()
-            confirm = True
+            print("Foi pego uma carta, caso não seja possivel discarte aperte 0 novamente")
+            self.deckPrint()
+            if(self.pegarCard == 2):
+                confirm = True
         else:
             if(escolhaCheck[0] == self.ultimoDiscarte[0]):
                 self.reversoEblockCheck(escolhaCheck)
@@ -161,8 +166,7 @@ class Jogo:
         return confirm
     
     def discarte(self):
-        sleep(1); #os.system('clear'); 
-        escolha = 99; confirme = False;
+        sleep(1); os.system('clear'); escolha = 99; confirme = False;
         print("Vez do jogador : " + str(self.auxJogador.nome)+ "\nCarta passada : "+ str(self.ultimoDiscarte))
         self.deckPrint()
         if(self.round == 0):
@@ -172,20 +176,26 @@ class Jogo:
             escolha = self.auxJogador.deck[escolha - 1]
             self.ultimoDiscarte = escolha.split(' ')
             self.auxJogador.deck.remove(escolha)
+            confirme = True
             print(self.auxJogador.deck, self.ultimoDiscarte)
         else:
-            while(escolha > len(self.auxJogador.deck) and confirme == False):
+            while(confirme == False):
                 escolha = int(input("Escolha a carta a ser jogada")) 
-                escolhaCheck = self.auxJogador.deck[escolha - 1].split(' ')
-                print(escolhaCheck)
-                confirme = self.discarteCheck(escolha,escolhaCheck,confirme)
-                if(confirme == True):
-                    del self.auxJogador.deck[escolha - 1]
-                    self.ultimoDiscarte = escolhaCheck
-                    print(self.auxJogador.deck, self.ultimoDiscarte)
+                if(escolha < len(self.auxJogador.deck) and escolha >= 0):
+                    escolhaCheck = self.auxJogador.deck[escolha - 1].split(' ')
+                    print(escolhaCheck)
+                    confirme = self.discarteCheck(escolha,escolhaCheck,confirme)
+                    if(confirme == True):
+                        if(self.pegarCard == 2):
+                            print("Passa jogada !!")
+                        else:
+                            del self.auxJogador.deck[escolha - 1]
+                            self.ultimoDiscarte = escolhaCheck
+                        print(self.auxJogador.deck, self.ultimoDiscarte)
+                        self.pegarCard = 0
                 else:
                     print("Jogada Invalida, será necessario tentar jogar outra carta")
-        print("sai do while " + str(confirme))
+            print("sai do while " + str(confirme))
         self.round += 1 
         self.proxJogar()
         print()

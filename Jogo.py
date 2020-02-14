@@ -65,7 +65,7 @@ class Jogo:
     
     def deckPrint(self, thing):
         count1 = 0
-        count2 = (len(self.auxJogador.deck )-1)*3
+        count2 = (len(thing)-1)*3
         for i in thing:
             for j in i:
                 count1 += 1
@@ -116,7 +116,7 @@ class Jogo:
         noAux = self.inicioFila
         for i in range(self.nJogadores):
             if(len(noAux.deck) == 0):
-                print("O "+ str(noAux.nome) + "e o ganhador !!")
+                print("O "+ str(noAux.nome) + " e o ganhador !!")
                 self.fimJogo = True
                 return True
             else:
@@ -125,13 +125,14 @@ class Jogo:
     
     def pegarCarta(self):
         novaCarta = ''
-        if(len(self.stack) != 0):
-            novaCarta = random.choice(self.stack)
-            self.stack.remove(novaCarta)
-        else:
-            novaCarta = random.choice(self.discardStack)
-            self.discardStack.remove(novaCarta)
-        self.auxJogador.deck.append(novaCarta)
+        if(self.pegarCard == 0):
+            if(len(self.stack) != 0):
+                novaCarta = random.choice(self.stack)
+                self.stack.remove(novaCarta)
+            else:
+                novaCarta = random.choice(self.discardStack)
+                self.discardStack.remove(novaCarta)
+            self.auxJogador.deck.append(novaCarta)
         self.pegarCard += 1
 
     def reversoEblockCheck(self,escolhaCheck):
@@ -147,11 +148,10 @@ class Jogo:
                 self.enqMais = True
                 self.acumuloCartas += int(escolhaCheck[1])
         else:
-            print("Acumulado de cartas está no total de : " + str(self.acumuloCartas))
             if(escolhaCheck[1] in ['+2','+4']):
                 self.acumuloCartas += int(escolhaCheck[1])
+                print("Acumulado de cartas está no total de : " + str(self.acumuloCartas))
             else:
-                print("Voce receberá : " + str(self.acumuloCartas))
                 if(len(self.stack) != 0):
                     for i in range(self.acumuloCartas):
                         novaCarta = random.choice(self.stack)
@@ -162,6 +162,8 @@ class Jogo:
                         novaCarta = random.choice(self.discardStack)
                         self.auxJogador.deck.append(novaCarta)
                         self.discardStack.remove(novaCarta) 
+                print("Voce receberá : " + str(self.acumuloCartas))
+                self.deckPrint(self.auxJogador.deck)
                 self.enqMais = False; self.acumuloCartas = 0
 
 
@@ -172,6 +174,12 @@ class Jogo:
             self.deckPrint(self.auxJogador.deck)
             if(self.pegarCard == 2):
                 confirm = True
+                if(self.enqMais == True):
+                    for i in range(self.acumuloCartas):
+                        self.pegarCarta()
+                    print("Voce receberá : " + str(self.acumuloCartas))
+                    self.deckPrint(self.auxJogador.deck)
+                    self.enqMais = False; self.acumuloCartas = 0
         else:
             if(escolhaCheck[0] == self.ultimoDiscarte[0]):
                 self.reversoEblockCheck(escolhaCheck)
@@ -190,10 +198,11 @@ class Jogo:
                         cor = int(input("Escolha a cor :"))
                     print("Cor foi mudada para : " + str(cores[cor-1]))
                     escolhaCheck[0] = cores[cor-1]
-                    confirm = True
-                elif(escolhaCheck[1] in ['+2','+4']):
                     self.maisCarta(escolhaCheck)
                     confirm = True
+                #elif(escolhaCheck[1] in ['+2','+4']):
+                #    self.maisCarta(escolhaCheck)
+                #    confirm = True
         return confirm,escolhaCheck
     
     def discarte(self):
@@ -204,7 +213,7 @@ class Jogo:
         self.deckPrint(self.auxJogador.deck)
         if(self.round == 0):
             print('Pode jogar qualquer carta.\nObs:Cartas de efeito não funcionaram.')
-            while(escolha >= len(self.auxJogador.deck)):
+            while(escolha > len(self.auxJogador.deck)):
                 escolha = int(input("Escolha a carta a ser jogada"))
             escolha = self.auxJogador.deck[escolha - 1]
             self.ultimoDiscarte = escolha.split(' ')
@@ -213,8 +222,10 @@ class Jogo:
             print(self.auxJogador.deck, self.ultimoDiscarte)
         else:
             while(confirme == False):
+                if(self.enqMais == True):
+                    print("Mais cartas acumulada total de cartas : " + str(self.acumuloCartas))
                 escolha = int(input("Escolha a carta a ser jogada")) 
-                if(escolha < len(self.auxJogador.deck) and escolha >= 0):
+                if(escolha <= len(self.auxJogador.deck) and escolha >= 0):
                     escolhaCheck = self.auxJogador.deck[escolha - 1].split(' ')
                     print(escolhaCheck)
                     confirme,escolhaCheck = self.discarteCheck(escolha,escolhaCheck,confirme)

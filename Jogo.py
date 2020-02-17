@@ -61,7 +61,6 @@ class Jogo:
                 aux.deck.append(x)
                 self.stack.remove(x)
                 aux = aux.getProxJogador()
-        #self.imprimirFilaJogadores()
     
     def deckPrint(self, thing):
         count1 = 0
@@ -152,16 +151,9 @@ class Jogo:
                 self.acumuloCartas += int(escolhaCheck[1])
                 print("Acumulado de cartas está no total de : " + str(self.acumuloCartas))
             else:
-                if(len(self.stack) != 0):
-                    for i in range(self.acumuloCartas):
-                        novaCarta = random.choice(self.stack)
-                        self.auxJogador.deck.append(novaCarta)
-                        self.stack.remove(novaCarta)
-                else:
-                   for i in range(self.acumuloCartas):
-                        novaCarta = random.choice(self.discardStack)
-                        self.auxJogador.deck.append(novaCarta)
-                        self.discardStack.remove(novaCarta) 
+                for i in range(self.acumuloCartas):
+                        self.pegarCard = 0
+                        self.pegarCarta()
                 print("Voce receberá : " + str(self.acumuloCartas))
                 self.deckPrint(self.auxJogador.deck)
                 self.enqMais = False; self.acumuloCartas = 0
@@ -176,6 +168,7 @@ class Jogo:
                 confirm = True
                 if(self.enqMais == True):
                     for i in range(self.acumuloCartas):
+                        self.pegarCard = 0
                         self.pegarCarta()
                     print("Voce receberá : " + str(self.acumuloCartas))
                     self.deckPrint(self.auxJogador.deck)
@@ -200,9 +193,6 @@ class Jogo:
                     escolhaCheck[0] = cores[cor-1]
                     self.maisCarta(escolhaCheck)
                     confirm = True
-                #elif(escolhaCheck[1] in ['+2','+4']):
-                #    self.maisCarta(escolhaCheck)
-                #    confirm = True
         return confirm,escolhaCheck
     
     def discarte(self):
